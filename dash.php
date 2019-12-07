@@ -1,6 +1,14 @@
-<?php   
-require 'header.php';
+<?php require 'header.php'; ?>
+
+<?php
+  if(empty($_SESSION['cLogin'])) {
+    ?>
+    <script type="text/javascript">window.location.href="login.php";</script>
+  <?php
+  exit;
+  }
 ?>
+ 
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
 <h1 class="h2 mt-3">Ponto</h1>
 <hr>
@@ -9,65 +17,93 @@ require 'header.php';
   <?php 
   require 'classes/ponto.class.php'; 
   $p = new Ponto();
+
   if(isset($_POST['cpf']) && !empty($_POST['cpf'])) {
-    $cpf = addslashes($_POST['cpf']);
-    $horaedata = addslashes($_POST['horaedata']);
-    $tipo = addslashes($_POST['tipo']);
-    $latitude = addslashes($_POST['latitude']);
-    $longitude = addslashes($_POST['longitude']);
+    $data = ($_POST['data']);
+    $data = date("Y-m-d",strtotime(str_replace('/','-',$data)));
+    $hora = ($_POST['hora']);
+    $tipo = ($_POST['tipo']);
+    $lt = ($_POST['lt']);
+    $lg = ($_POST['lg']);
     
 
-    if(!empty($cpf) && !empty($horaedata) && !empty($tipo) && !empty($latitude) && !empty($longitude)){
-      if($p->adicionarponto($cpf, $horaedata, $tipo, $latitude, $longitude)) {
-        ?>
-        <div class="alert alert-success">
-          <strong>Ponto</strong> Efetuado com sucesso!
-        </div>
-        <?php
-      }
+  if(!empty($_POST['tipo'])) { 
+    if($p->adicionarponto($data, $hora, $tipo, $lt, $lg)) {
+      ?>
+      <div class="alert alert-success">
+        <strong>Ponto</strong> Efetuado com sucesso!
+        <script type="text/javascript">
+          setTimeout(function() {
+        window.location.href="dash.php";
+          }, 5000);
+        </script>
+      </div>
+      <?php
+    }
     } else {
       ?>
-      <div class="alert alert-danger">
+      <div class="alert alert-warning">
         Não foi possível bater o ponto.
       </div>
       <?php
-      }
     }
+  }
   ?>
+ <div id="geoarea"></div>
+  <script type="text/javascript">
+    var area = document.getElementById("geoarea");
+    function ExibirLocalizacao()
+    {
+    if (navigator.geolocation)
+      {
+    navigator.geolocation.getCurrentPosition(ObterPosicao);
+      }
+    else{area.innerHTML="Sem Suporte Geolocalização.";}
+    }
+    function ObterPosicao(posicao) {
+  
+    document.getElementById('lt').value = posicao.coords.latitude; 
+    document.getElementById('lg').value = posicao.coords.longitude;  
+   
+    area.innerHTML = "Latitude: " + position.coords.latitude +
+    "<br>Longitude: " + position.coords.longitude;
+    }
+  </script>
+  
 
-      <form method="POST" action="teste.php">
+      <form method="POST">
+      
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 
         <div class="d-flex ">
           <div class="form-group col-3 ml-3 p-0 ">
           <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">CPF</div>
-            <input class="form-control " type ="text" name="cpf" id="cpf" placeholder=""  value="">
-		  </div>
+            <input class="form-control " type ="text" name="cpf" id="cpf" placeholder="" readonly value="<?php echo $_SESSION['cLogin']; ?>">
+		    </div>
 
       <div class="form-group col-3 ml-2 p-0 ">
           <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Data</div>
-          <input class="form-control" type ="text" name="horaedata" id="horaedata"placeholder="" readonly value= "<?php date_default_timezone_set('America/Fortaleza'); echo (date("d/m/Y")); ?>" >
+          <input class="form-control" type ="text" name="data" id="data" placeholder="" readonly value= "<?php date_default_timezone_set('America/Fortaleza'); echo (date("d/m/Y")); ?>" >
 		  </div>
 
 
             
        <div class="form-group col-2 ml-3 p-0 ">
           <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Hora</div>
-          <input class="form-control" type ="text" name="horaedata" id="horaedata"placeholder="" readonly value= "<?php date_default_timezone_set('America/Fortaleza'); echo (date("H:i:s")); ?>" >
+          <input class="form-control" type ="text" name="hora" id="hora" placeholder="" readonly value= "<?php date_default_timezone_set('America/Fortaleza'); echo (date("H:i:s")); ?>" >
 		  </div>
   
           <div class="form-group col-2 ml-3 p-0 ">
           <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tipo</div>
 				    <select class="form-control" name="tipo" id=>
-					    <option value=""></option>
-              <option value="Entrada">Entrada</option>
+					    <option value="Entrada">Entrada</option>
               <option value="Saída">Saída</option>
             </select>
           </div>
-          
-          <input type="hidden" name="latitude" value="" id="lt" />
-          <input type="hidden" name="longitude" value="" id="lg" />
 
+          <input type="hidden" name="lt" value="" id="lt" />
+          <input type="hidden" name="lg" value="" id="lg" />
+          
           <div class="form-group mr-5 ml-3 p-0 mt-4">
          
           <input type="submit" value="Lançar" class="btn btn-primary"> 
@@ -83,12 +119,13 @@ require 'header.php';
             <div class="btn-toolbar mb-2 mb-md-0">            
             </div>
           </div>
-          <?php 
-            /*include ('config.php');
-            $sql = "SELECT SUM(valor_pagto) AS total FROM financeiro";
-            $sql = $pdo->query($sql);
-            $receitas = $sql->fetchColumn();*/
-            ?>
+          <?php
+          require 'classes/usuarios.class.php';
+          $i = new Usuarios();
+          $infos = $i->getInfo();
+
+          foreach ($infos as $info):
+          ?>
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
           <div class="col-xl-3 col-md-6 mb-4">
               <div class="card border-left-primary shadow h-100 py-2">
@@ -106,10 +143,6 @@ require 'header.php';
               </div>
             </div>
             <?php 
-            /*include ('config.php');
-            $sql = "SELECT SUM(salario) AS total FROM funcionario";
-            $sql = $pdo->query($sql);
-            $despesas = $sql->fetchColumn();*/
             ?>
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card border-left-success shadow h-100 py-2">
@@ -127,10 +160,6 @@ require 'header.php';
               </div>
             </div>
             <?php 
-            /*include ('config.php');
-            $sql = "SELECT count(*) AS rg FROM paciente";
-            $sql = $pdo->query($sql);
-            $paciente = $sql->fetchColumn();*/
             ?>
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card border-left-info shadow h-100 py-2">
@@ -140,7 +169,7 @@ require 'header.php';
                       <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Cargo</div>
                       <div class="row no-gutters align-items-center">
                         <div class="col-auto">
-                          <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">Desenvolvedor</div>
+                          <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">Desenvolvimento</div>
                         </div>
                         <div class="col">
                           
@@ -155,10 +184,6 @@ require 'header.php';
               </div>
             </div>
             <?php 
-            /*include ('config.php');
-            $sql = "SELECT count(rg_consulta) FROM consulta";
-            $sql = $pdo->query($sql);
-            $consultas = $sql->fetchColumn();*/
             ?>
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card border-left-warning shadow h-100 py-2">
@@ -176,41 +201,32 @@ require 'header.php';
               </div>
             </div>
           </div>    
-          <h2>Saldo Hora Ano</h2>
-          <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
-     
-
+          <?php endforeach; ?>        
           <h2>Linha do Tempo</h2>
           <div class="table-responsive">
             <table class="table table-striped table-sm">
               <thead>
                 <tr>
                 <th>CPF</th>
-                <th>DATA E HORA</th>
+                <th>DATA</th>
+                <th>HORA</th>
                 <th>TIPO</th>
-                <th>LOCALIZAÇÃO</th>
                 </tr>
               </thead>
               <tbody>
 <?php
-  $sql = "SELECT * FROM ponto WHERE id = :id LIMIT 5";
+$a = new Ponto();
+$pontos = $a->getPonto();
 
-  $sql = $pdo->query($sql);
-  
-  if($sql->rowCount() > 0 ) {
-    foreach($sql->fetchAll() as $item):
-    ?>
+foreach ($pontos as $ponto):
+?>
   <tr>
-    <td><?php echo $item['cpf']; ?></td>   
-    <td><?php echo $item['data_hora_ponto']; ?></td>
-    <td><?php echo $item['entrada_saida']; ?></td>
-    <td><?php echo $item['local_latitude']; ?></td>
-    <td><?php echo $item['local_longitude']; ?></td>
+    <td><?php echo $ponto['cpf_usuario']; ?></td>   
+    <td><?php echo date("d/m/Y", strtotime($ponto['data_ponto'])); ?></td>
+    <td><?php echo $ponto['hora_ponto']; ?></td>
+    <td><?php echo $ponto['entrada_saida']; ?></td>
   </tr>
-<?php 
-  endforeach;
-}
-?>  
+<?php endforeach; ?>  
 </tbody>
 </table>
 </div>
@@ -227,9 +243,7 @@ require 'header.php';
     <script>
       feather.replace()
     </script>
-
-    <!-- Gráficos -->
-
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
     <script>
       var ctx = document.getElementById("myChart");

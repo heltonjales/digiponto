@@ -1,21 +1,22 @@
 <?php
 require 'config.php';
-
-
+require 'classes/usuarios.class.php';
+$u = new Usuarios();
 if (isset($_POST['usuario']) && !empty($_POST['usuario'])) {
     $usuario = addslashes($_POST['usuario']);
     $senha = md5(addslashes($_POST['senha']));
 
-        
-        $sql = "SELECT * FROM usuarios WHERE usuario = '$usuario' AND senha = '$senha'";
-        $sql = $pdo->query($sql);
-        if ($sql->rowCount() > 0) {
-            $dado = $sql->fetch();
-            $_SESSION['id'] = $dado['id'];
-            header("Location: dash.php"); 
-        } else {
-          echo "";
-        }
+    if($u->login($usuario, $senha)) {
+      ?>
+      <script type="text/javascript">window.location.href="dash.php";</script>
+      <?php
+    } else {
+      ?>
+      <div class="alert alert-danger">
+        Usuário e/ou senha incorretos.
+      </div>
+      <?php
+    }
 }
 ?>
 <!doctype html>

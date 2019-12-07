@@ -11,6 +11,7 @@ try {
 
 } catch (PDOException $e) {
 	echo "Conexão Falhou".$e->getMessage(); 
+	exit;
 }
 
 ?>

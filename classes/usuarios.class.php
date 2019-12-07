@@ -1,27 +1,38 @@
 <?php
 class Usuarios {
 	
-	private $pdo;
-	public function __construct() {
-		$this->pdo = new PDO("mysql:dbname=digiponto;host=127.0.0.1", "root", "root");
-
-    }
-
-    public function getUsuario() {
+    public function login($usuario, $senha) {
         global $pdo;
-        $array = array(); 
-        $sql = $pdo->prepare("SELECT * FROM usuarios WHERE id_usuario = :id_usuario");
-        $sql->bindValue(":id_usuario", $_SESSION['id']);
+        $sql = $pdo->prepare("SELECT cpf FROM usuarios WHERE usuario = :usuario AND senha = :senha");
+        $sql->bindValue(":usuario", $usuario);
+        $sql->bindValue(":senha", $senha);
         $sql->execute();
         
   
         if ($sql->rowCount() > 0) {
-          $array = $sql->fetchAll();
-        } 
+          $dado = $sql->fetch();
+          $_SESSION['cLogin'] = $dado['cpf'];
+          return true;
+        } else {
+          return false;
+        }
+    }
 
+    public function getInfo() {
+        global $pdo;
+
+        $array = array();
+
+        $sql = $pdo->prepare("SELECT * FROM funcionarios WHERE cpf = :cpf");
+        $sql->bindValue(":cpf", $_SESSION['cLogin']);
+        $sql->execute();
+
+        if($sql->rowCount() > 0) {
+          $array = $sql->fetchAll();
+        }
+    
         return $array;
     }
-}
-
+  }  
 
     

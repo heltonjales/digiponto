@@ -1,6 +1,6 @@
 <?php require 'config.php'; ?>
 <!doctype html>
-<html lang="pt">
+<html lang="pt" onclick="ExibirLocalizacao()">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -19,30 +19,8 @@
     <link href="css/style.css" rel="stylesheet">
   </head>
 
-  <body onload="ExibirLocalizacao()">
-  <div id="geoarea"></div>
-  <script type="text/javascript">
-  var area = document.getElementById("geoarea");
-  function ExibirLocalizacao()
-  {
-  if (navigator.geolocation)
-    {
-    navigator.geolocation.getCurrentPosition(ObterPosicao);
-    }
-  else{area.innerHTML="Sem Suporte Geolocalização.";}
-  }
-  function ObterPosicao(posicao) {
-  
-  document.getElementById('lt').value = posicao.coords.latitude; 
-  document.getElementById('lg').value = posicao.coords.longitude;  
-   
-  area.innerHTML = "Latitude: " + position.coords.latitude +
-  "<br>Longitude: " + position.coords.longitude;
-  }
-  </script>  
-  
-
-    <nav class="navbar navbar-dark fixed-top bg-primary flex-md-nowrap p-0 shadow">
+  <body >
+      <nav class="navbar navbar-dark fixed-top bg-primary flex-md-nowrap p-0 shadow">
       <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="dash.php">DIGIPONTO</a>
       <!--<input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
       <ul class="navbar-nav px-3">
@@ -71,7 +49,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="cadastro_medico.php">
+                <a class="nav-link" href="meuponto.php">
                 <i class="fas fa-clock"></i>
                   Meu Ponto
                 </a>
